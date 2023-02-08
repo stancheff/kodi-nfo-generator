@@ -1,3 +1,5 @@
+# vim: set expandtab tabstop=4
+
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -24,6 +26,7 @@ from kodi.io_utils import determine_dirs, prompt, read_id, TAG_MOVIE, TAG_TVSHOW
 from kodi.xml_utils import add_node, output_xml
 from kodi.imdb_series import has_episodes, create_episodes_url, extract_seasons, extract_episodes, episode_to_xml, \
     extract_season_episode, determine_episodes
+from datetime import datetime
 
 # logging setup
 logger = logging.getLogger("kodi.imdb")
@@ -216,6 +219,7 @@ def generate_imdb(id, language="en", fanart="none", fanart_file="folder.jpg", pa
                 # locate files and output XML
                 dirs = []
                 determine_dirs(path, True, dirs)
+                unique = 0
                 for d in dirs:
                     files = fnmatch.filter(os.listdir(d), episode_pattern)
                     for f in files:
@@ -225,6 +229,25 @@ def generate_imdb(id, language="en", fanart="none", fanart_file="folder.jpg", pa
                         if parts is None:
                             continue
                         s, e = parts
+                        unique += 1
+                        if not ((s in season_data) and (e in season_data[s])):
+                            # For non-released 'seaons' (extras, OVAs...)
+                            if s not in season_data:
+                                season_data[s] = {}
+                            logger.info(" .. missing imdb for season %(s)s, episode %(e)s generating a generic entry" % locals())
+                            generic = {
+                                "_uniqueid": "S%sE%s_%d" % (s, e, unique),
+                                "season": s,
+                                "episode": e,
+                                "title": "Season %s episode %s" % (s, e),
+                                "plot": 'Missing from imdb',
+                                "aired": datetime.now(),
+                                "_rating": {
+                                    "value": '7.1',
+                                    "votes": '1',
+                                }
+                            }
+                            season_data[s][e] = episode_to_xml(generic)
                         if (s in season_data) and (e in season_data[s]):
                             xml_path_ep = os.path.join(d, os.path.splitext(f)[0] + ".nfo")
                             if output_xml(season_data[s][e], xml_path_ep, dry_run=dry_run, overwrite=overwrite, logger=logger):
