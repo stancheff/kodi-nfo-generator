@@ -174,7 +174,7 @@ def generate_imdb(id, language="en", fanart="none", fanart_file="folder.jpg", pa
         else:
             logger.critical("Ignoring unhandled fanart type: %s" % fanart_act)
 
-        if has_episodes(j):
+        if has_episodes(id, soup):
             logger.info("Has episode data")
 
             # use special name rather than name-based one
