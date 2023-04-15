@@ -29,7 +29,7 @@ AIRDATE_FORMAT = "%d %b. %Y"
 logger = logging.getLogger("kodi.imdb")
 
 
-def has_episodes(soup):
+def has_episodes(id, soup):
     """
     Checks whether episodes are available for this parsed IMDB page.
 
@@ -39,8 +39,16 @@ def has_episodes(soup):
     :rtype: bool
     """
     episodes = soup.find("a", href="episodes/?ref_=tt_ov_epl")
-    return episodes is not None
+    if episodes is not None:
+        return True
 
+    ep_href = "/title/%(id)s/episodes?ref_=tt_eps_sm" % locals()
+    logger.info("episodes/?ref_=tt_ov_epl not found ... trying %(ep_href)s" % locals())
+    episodes = soup.find("a", href=ep_href)
+    if episodes is not None:
+        return True
+
+    return False
 
 def create_episodes_url(id, season=None):
     """
