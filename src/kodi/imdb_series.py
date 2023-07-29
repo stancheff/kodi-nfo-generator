@@ -1,3 +1,5 @@
+# vim: expandtab:ts=4
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -15,6 +17,7 @@
 # Copyright (C) 2021-2023 Fracpete (fracpete at gmail dot com)
 
 import fnmatch
+import re
 import logging
 import os
 import re
@@ -83,8 +86,12 @@ def extract_seasons(soup):
     seasons = soup.find("select", id="bySeason")
     if seasons is not None:
         logger.info("Season using dropdown")
-        for option in seasons.find_all("option"):
-            result.append(option["value"])
+        try:
+            for option in seasons.find_all("option"):
+                result.append(option["value"])
+        except:
+            for n in range(1, 10):
+                result.append(str(n))
         return result
 
     # buttons for seasons
