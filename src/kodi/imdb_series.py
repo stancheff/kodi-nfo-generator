@@ -244,12 +244,15 @@ def extract_episodes_html(soup, season):
                         pass
 
             # rating
-            rating = None
+            rating = 0.0
             rating_tag = article.find("span", attrs={"class": "ipc-rating-star"})
             if (rating_tag is not None) and ("aria-label" in rating_tag):
-                s = rating_tag["aria-label"]
-                s = s[s.index(":") + 1:]
-                rating = float(s)
+                try:
+                    s = rating_tag["aria-label"]
+                    s = s[s.index(":") + 1:]
+                    rating = float(s)
+                except:
+                    rating = 0.0
 
             # votes
             # not available anymore?
